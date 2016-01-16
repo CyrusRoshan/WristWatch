@@ -18,9 +18,9 @@ void loop() {
 void serialEvent() {
     while (Serial.available()) {
         char inChar = (char)Serial.read();
-        if (inChar == '0' || inChar == '1') {
+        if (inChar == '0') {
             digitalWrite(9, HIGH);
-        } else {
+        } else if ( inChar == '1') {
             digitalWrite(9, LOW);
         }
     }
