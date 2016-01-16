@@ -1,3 +1,9 @@
+int sensor1 = 0;
+int sensor2 = 0;
+int button = 0;
+
+
+
 void setup() {
     pinMode(9, OUTPUT);
     Serial.begin(9600);
@@ -5,12 +11,16 @@ void setup() {
 
 // the loop routine runs over and over again forever:
 void loop() {
+    sensor1 = analogRead(A0);
+    sensor2 = analogRead(A1);
+    button = digitalRead(A2);
+
     Serial.print("[");
-    Serial.print(analogRead(A0));
+    Serial.print(sensor1);
     Serial.print(", ");
-    Serial.print(analogRead(A1));
+    Serial.print(sensor2);
     Serial.print(", ");
-    Serial.print(digitalRead(8));
+    Serial.print(button);
     Serial.println("]");
     delay(10);
 }
@@ -18,9 +28,9 @@ void loop() {
 void serialEvent() {
     while (Serial.available()) {
         char inChar = (char)Serial.read();
-        if (inChar == '0') {
+        if (inChar == 'Y') {
             digitalWrite(9, HIGH);
-        } else if ( inChar == '1') {
+        } else if ( inChar == 'N') {
             digitalWrite(9, LOW);
         }
     }
