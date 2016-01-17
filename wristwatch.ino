@@ -32,8 +32,12 @@ void serialEvent() {
         char inChar = (char)Serial.read();
         if (inChar == 'Y') {
             digitalWrite(9, HIGH);
-        } else if ( inChar == 'N') {
+        } else if (inChar == 'N') {
             digitalWrite(9, LOW);
+        } else if (inChar == 'Z') {
+            digitalWrite(13, HIGH);
+        } else if (inChar == 'X') {
+            digitalWrite(13, LOW);
         }
     }
 }
