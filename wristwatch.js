@@ -84,11 +84,11 @@ serialPort.on('open', function () {
                     //console.log(avg.sensor1.movingAverage(), avg.sensor2.movingAverage())
                     var date = new Date;
 
-                    if (avg.sensor1.movingAverage() < 45){
+                    if (avg.sensor1.movingAverage() < 50){
                         console.log(`Hand too far up at time ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}, moving avg is ${avg.sensor1.movingAverage()}`);
                         handPosition = 'Too far up';
                         vibrationOn();
-                    } else if (avg.sensor2.movingAverage() < 40) {
+                    } else if (avg.sensor2.movingAverage() < 55) {
                         console.log(`Hand too far down at time ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}, moving avg is ${avg.sensor2.movingAverage()}`);
                         handPosition = 'Too far down';
                         vibrationOn();
@@ -105,9 +105,9 @@ serialPort.on('open', function () {
                     flappyAvg.sensor1.push(Date.now(), angle1);
                     flappyAvg.sensor2.push(Date.now(), angle2);
 
-                    if (flappyAvg.sensor1.movingAverage() < 55){
+                    if (flappyAvg.sensor1.movingAverage() < 65){
                         startFlapTime = Date.now();
-                    } else if (flappyAvg.sensor2.movingAverage() < 55 && Date.now() < startFlapTime + 2000) {
+                    } else if (flappyAvg.sensor2.movingAverage() < 65 && Date.now() < startFlapTime + 700) {
                         flap();
                         startFlapTime = 0;
                     }
