@@ -3,17 +3,31 @@ var serialport = require("serialport");
 var SerialPort = serialport.SerialPort;
 var robot = require("robotjs");
 var MA = require('moving-average');
+var localtunnel = require('localtunnel');
+var koa = require('koa');
+var route = require('koa-route');
+var cors = require('koa-cors');
+var app = koa();
+
+app.use(cors());
 
 var preAvgTimeInterval = 2.5 * 1000;
-var timeInterval = 10 * 1000;
-var flappyTimeInterval = 1 * 1000;
+var timeInterval = 30 * 1000;
+var flappyTimeInterval = 0.25 * 1000;
 
 var preAvg = {sensor1: MA(preAvgTimeInterval), sensor2: MA(preAvgTimeInterval)};
 var avg = {sensor1: MA(timeInterval), sensor2: MA(timeInterval)};
 var flappyAvg = {sensor1: MA(flappyTimeInterval), sensor2: MA(flappyTimeInterval)};
 
 var vibrationState = false;
-var flappyState = false;
+var flappyState;
+
+var startTime = Date.now();
+var angle1;
+var angle2;
+var handPosition;
+var flappyPlay = false;
+var startFlapTime;
 
 sensorRange = {
     min: [],
@@ -29,12 +43,6 @@ var serialPort = new SerialPort("/dev/cu.usbmodem1411", {
 
 serialPort.on('open', function () {
     console.log('CALIBRATING, PLEASE MOVE HAND AS FAR BACKWARDS AND FORWARDS AS POSSIBLE');
-
-    var startTime = Date.now();
-    var angle1;
-    var angle2;
-    var flappyPlay = false;
-    var startFlapTime;
 
     vibrationOff();
 
@@ -65,6 +73,9 @@ serialPort.on('open', function () {
 
                 if (!flappyPlay) {
                     //for regular functionality
+                    if (flappyState) {
+                        console.log('REGULAR FUNCTIONALITY ENABLED');
+                    }
                     notify(false);
 
                     avg.sensor1.push(Date.now(), angle1);
@@ -73,26 +84,32 @@ serialPort.on('open', function () {
                     //console.log(avg.sensor1.movingAverage(), avg.sensor2.movingAverage())
                     var date = new Date;
 
-                    if (avg.sensor1.movingAverage() < 40){
+                    if (avg.sensor1.movingAverage() < 45){
                         console.log(`Hand too far up at time ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}, moving avg is ${avg.sensor1.movingAverage()}`);
+                        handPosition = 'Too far up';
                         vibrationOn();
                     } else if (avg.sensor2.movingAverage() < 40) {
                         console.log(`Hand too far down at time ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}, moving avg is ${avg.sensor2.movingAverage()}`);
+                        handPosition = 'Too far down';
                         vibrationOn();
                     } else {
                         vibrationOff();
                     }
                 } else {
                     //for flappy bird
+                    if (flappyState === false || flappyState === undefined) {
+                        console.log('FLAPPY BIRD FUNCTIONALITY ENABLED');
+                    }
                     notify(true);
 
                     flappyAvg.sensor1.push(Date.now(), angle1);
                     flappyAvg.sensor2.push(Date.now(), angle2);
 
-                    if (avg.sensor1.movingAverage() < 40){
+                    if (flappyAvg.sensor1.movingAverage() < 55){
                         startFlapTime = Date.now();
-                    } else if (avg.sensor2.movingAverage() < 40 && Date.now() < startFlapTime + 2000) {
+                    } else if (flappyAvg.sensor2.movingAverage() < 55 && Date.now() < startFlapTime + 2000) {
                         flap();
+                        startFlapTime = 0;
                     }
                 }
             }
@@ -144,4 +161,27 @@ function notify(value){
         serialPort.write('X');
         flappyState = false;
     }
+}
+
+function realAngle(){
+    return (angle2 - angle1)/2;
+}
+
+try {
+    var tunnel = localtunnel(3000, function(err, tunnel) {
+        app.use(function *(){
+            this.body = {
+                angle: realAngle(),
+                position: handPosition,
+                angle1: angle1,
+                angle2: angle2
+            };
+        });
+
+        app.listen(3000);
+
+        console.log('TUNNEL URL IS:', tunnel.url);
+    });
+} catch (err) {
+    console.log('ERROR:', err);
 }

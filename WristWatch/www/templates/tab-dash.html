@@ -1,0 +1,25 @@
+<ion-view view-title="Status">
+  <ion-content class="padding">
+
+    <div class="list card">
+      <div class="item item-image">
+        <img src="img/hand.png" style="width: 70%; transform: rotate({{realAngle}}deg);">
+      </div>
+    </div>
+
+    <div class="card">
+    <div class="item item-divider">
+      Current Stats:
+    </div>
+    <div class="item item-text-wrap">
+      Badly Approximated angle: {{realAngle}}
+      <br>
+      Hand position: {{position}}
+      <br>
+      Raw % of Max S1: {{angle1}}
+      <br>
+      Raw % of Max S2: {{angle2}}
+    </div>
+  </div>
+  </ion-content>
+</ion-view>
