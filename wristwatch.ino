@@ -1,5 +1,6 @@
 int sensor1 = 0;
 int sensor2 = 0;
+int flappyPin = 0;
 int button = 0;
 
 
@@ -13,14 +14,15 @@ void setup() {
 void loop() {
     sensor1 = analogRead(A0);
     sensor2 = analogRead(A1);
-    button = digitalRead(A2);
+    flappyPin = analogRead(A2);
+    button = digitalRead(A3);
 
     Serial.print("[");
     Serial.print(sensor1);
     Serial.print(", ");
     Serial.print(sensor2);
     Serial.print(", ");
-    Serial.print(button);
+    Serial.print(flappyPin);
     Serial.println("]");
     delay(10);
 }
